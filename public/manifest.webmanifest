@@ -1,13 +1,32 @@
 {
   "name": "HorseFeed Manager",
   "short_name": "HorseFeed",
-  "description": "馬の給餌・栄養バランス管理アプリ",
+  "description": "Diet, nutrition, feeding history, and life-stage management app for riding horses.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f1e8",
-  "theme_color": "#7a4f2b",
+  "orientation": "portrait",
+  "background_color": "#062826",
+  "theme_color": "#062826",
+  "categories": ["health", "productivity", "utilities"],
   "icons": [
-    { "src": "./icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
-    { "src": "./icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }
