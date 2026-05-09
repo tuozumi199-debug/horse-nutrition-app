@@ -9,18 +9,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "typescript": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "dexie": "latest",
-    "recharts": "latest",
-    "papaparse": "latest"
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "5.4.11",
+    "typescript": "5.6.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-is": "18.2.0",
+    "dexie": "4.0.10",
+    "recharts": "2.12.7",
+    "papaparse": "5.4.1"
   },
   "devDependencies": {
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "@types/papaparse": "latest"
+    "@types/react": "18.2.79",
+    "@types/react-dom": "18.2.25",
+    "@types/papaparse": "5.3.15"
   }
 }
