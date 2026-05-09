@@ -2,16 +2,44 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#2f855a" />
+
+    <title>HorseFeed Manager</title>
+    <meta
+      name="description"
+      content="Diet, nutrition, feeding history, and life-stage management app for riding horses."
+    />
+
+    <!-- PWA / iPhone home screen settings -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+
+    <!-- iPhone / iPad home screen icon -->
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+
+    <!-- Browser / Android / PWA icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png" />
+    <link rel="icon" type="image/png" sizes="1024x1024" href="./icon-1024.png" />
+
+    <!-- App appearance -->
+    <meta name="theme-color" content="#062826" />
+    <meta name="background-color" content="#062826" />
+
+    <!-- iOS standalone mode -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="HorseFeed" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <link rel="apple-touch-icon" href="/horse-nutrition-app/icons/icon-192.png" />
-    <title>HorseFeed Manager</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Windows tile color -->
+    <meta name="msapplication-TileColor" content="#062826" />
+    <meta name="msapplication-TileImage" content="./icon-192.png" />
   </head>
+
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
