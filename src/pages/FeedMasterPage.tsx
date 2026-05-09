@@ -15,7 +15,7 @@ const emptyDraft: FeedDraft = {
   sourceType: "manual"
 };
 
-const nutrientFields: { key: keyof Feed; label: string; unit: string }[] = [
+const nutrientFields: { key: keyof FeedDraft; label: string; unit: string }[] = [
   { key: "dryMatterPercent", label: "乾物率", unit: "%" },
   { key: "deMcalPerKg", label: "DE", unit: "Mcal/kg" },
   { key: "crudeProteinGPerKg", label: "粗タンパク", unit: "g/kg" },
@@ -51,7 +51,7 @@ export function FeedMasterPage() {
     setDraft({ ...feed });
   }
 
-  function setNumberField(key: keyof Feed, value: string) {
+  function setNumberField(key: keyof FeedDraft, value: string) {
     setDraft({ ...draft, [key]: value === "" ? undefined : Number(value) });
   }
 

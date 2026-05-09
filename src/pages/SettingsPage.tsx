@@ -73,7 +73,7 @@ export function SettingsPage({ refreshHorses }: { refreshHorses: () => Promise<v
     if (!confirm("現在のローカルデータにバックアップ内容を上書き投入します。続行しますか？")) return;
     const text = await file.text();
     const payload = JSON.parse(text);
-    await db.transaction("rw", db.horses, db.feeds, db.feedingRecords, db.feedingPlans, db.feedingPlanItems, db.nutritionRequirements, db.simulationScenarios, db.simulationItems, async () => {
+    await db.transaction("rw", [db.horses, db.feeds, db.feedingRecords, db.feedingPlans, db.feedingPlanItems, db.nutritionRequirements, db.simulationScenarios, db.simulationItems], async () => {
       if (payload.horses) await db.horses.bulkPut(payload.horses);
       if (payload.feeds) await db.feeds.bulkPut(payload.feeds);
       if (payload.feedingRecords) await db.feedingRecords.bulkPut(payload.feedingRecords);
