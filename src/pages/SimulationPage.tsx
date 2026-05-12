@@ -31,11 +31,14 @@ export function SimulationPage({
   const [simRows, setSimRows] = useState<AchievementRow[]>([]);
   const [savedScenarioId, setSavedScenarioId] = useState<string>("");
   const [scenarioName, setScenarioName] = useState("栄養調整案");
-
   const [amountInputs, setAmountInputs] = useState<Record<string, string>>({});
 
   const horse = horses.find((h) => h.id === selectedHorseId);
-  const feedById = useMemo(() => new Map(feeds.map((f) => [f.id, f])), [feeds]);
+
+  const feedById = useMemo(
+    () => new Map(feeds.map((f) => [f.id, f])),
+    [feeds]
+  );
 
   const currentScore = useMemo(
     () => calculateNutritionScore(currentRows),
@@ -120,7 +123,7 @@ export function SimulationPage({
     }
 
     recalc();
-  }, [items, feeds, horse]);
+  }, [items, feeds, horse?.id]);
 
   function updateItem(index: number, patch: Partial<WorkItem>) {
     setItems((prev) =>
@@ -130,8 +133,8 @@ export function SimulationPage({
     setSavedScenarioId("");
   }
 
-  function updateAmountInput(index: number, key: string, rawValue: string) {
-    const cleaned = normalizeAmountInput(rawValue);
+  function handleAmountInput(index: number, key: string, rawValue: string) {
+    const cleaned = normalizeAmountInputHard(rawValue);
     const amount = amountStringToNumber(cleaned);
 
     setAmountInputs((prev) => ({
@@ -144,9 +147,9 @@ export function SimulationPage({
     });
   }
 
-  function commitAmountInput(index: number, key: string) {
-    const currentValue = amountInputs[key] ?? "";
-    const amount = amountStringToNumber(currentValue);
+  function handleAmountBlur(index: number, key: string, rawValue: string) {
+    const cleaned = normalizeAmountInputHard(rawValue);
+    const amount = amountStringToNumber(cleaned);
     const formatted = formatAmountForInput(amount);
 
     setAmountInputs((prev) => ({
@@ -421,14 +424,32 @@ export function SimulationPage({
                       <input
                         type="text"
                         inputMode="decimal"
+                        enterKeyHint="done"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck={false}
                         pattern="[0-9]*[.,]?[0-9]*"
                         value={inputValue}
                         placeholder="0"
-                        onFocus={(e) => e.currentTarget.select()}
-                        onChange={(e) =>
-                          updateAmountInput(idx, inputKey, e.target.value)
-                        }
-                        onBlur={() => commitAmountInput(idx, inputKey)}
+                        onFocus={(e) => {
+                          e.currentTarget.select();
+                        }}
+                        onChange={(e) => {
+                          const cleaned = normalizeAmountInputHard(
+                            e.currentTarget.value
+                          );
+
+                          e.currentTarget.value = cleaned;
+
+                          handleAmountInput(idx, inputKey, cleaned);
+                        }}
+                        onBlur={(e) => {
+                          handleAmountBlur(
+                            idx,
+                            inputKey,
+                            e.currentTarget.value
+                          );
+                        }}
                       />
                     </td>
 
@@ -577,17 +598,22 @@ function amountStringToNumber(value: string) {
   return numeric;
 }
 
-function normalizeAmountInput(value: string) {
-  let text = toHalfWidthNumberText(value);
+function normalizeAmountInputHard(value: string) {
+  let text = value
+    .replace(/[０-９]/g, (char) =>
+      String.fromCharCode(char.charCodeAt(0) - 0xfee0)
+    )
+    .replace(/[．。]/g, ".")
+    .replace(/[，、]/g, ".")
+    .replace(/,/g, ".")
+    .replace(/[^\d.]/g, "");
 
-  text = text.replace(/[^\d.]/g, "");
+  const firstDotIndex = text.indexOf(".");
 
-  const firstDot = text.indexOf(".");
-
-  if (firstDot >= 0) {
+  if (firstDotIndex >= 0) {
     text =
-      text.slice(0, firstDot + 1) +
-      text.slice(firstDot + 1).replace(/\./g, "");
+      text.slice(0, firstDotIndex + 1) +
+      text.slice(firstDotIndex + 1).replace(/\./g, "");
   }
 
   if (text === "") {
@@ -595,9 +621,9 @@ function normalizeAmountInput(value: string) {
   }
 
   const hasDot = text.includes(".");
-  const parts = text.split(".");
-  let integerPart = parts[0] ?? "";
-  const decimalPart = parts[1] ?? "";
+  const [rawIntegerPart, rawDecimalPart = ""] = text.split(".");
+
+  let integerPart = rawIntegerPart;
 
   if (hasDot && integerPart === "") {
     integerPart = "0";
@@ -607,21 +633,15 @@ function normalizeAmountInput(value: string) {
     integerPart = integerPart.replace(/^0+(?=\d)/, "");
   }
 
+  if (integerPart === "") {
+    integerPart = "0";
+  }
+
   if (hasDot) {
-    return `${integerPart}.${decimalPart}`;
+    return `${integerPart}.${rawDecimalPart}`;
   }
 
   return integerPart;
-}
-
-function toHalfWidthNumberText(value: string) {
-  return value
-    .replace(/[０-９]/g, (char) =>
-      String.fromCharCode(char.charCodeAt(0) - 0xfee0)
-    )
-    .replace(/[．。]/g, ".")
-    .replace(/[，、]/g, ".")
-    .replace(/,/g, ".");
 }
 
 function round(value: number, digits = 1) {
