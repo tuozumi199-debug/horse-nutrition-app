@@ -55,6 +55,7 @@ export type FeedingPlanChangeLog = {
   changeDate: string;
   effectiveFrom: string;
   reason?: string;
+  source?: string;
   summary: string;
   diffItems?: FeedingPlanChangeDiffItem[];
   createdAt: string;

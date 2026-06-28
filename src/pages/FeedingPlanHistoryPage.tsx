@@ -88,6 +88,7 @@ export function FeedingPlanHistoryPage({ horses }: { horses: Horse[] }) {
               <article className="list-card" style={{ display: "block" }} key={log.id}>
                 <h3 style={{ margin: "0 0 0.45rem" }}>{horseById.get(log.horseId)?.name ?? log.horseId}</h3>
                 <p className="muted" style={{ margin: "0.2rem 0" }}>変更理由: {log.reason || "未入力"}</p>
+                {log.source && <p className="muted" style={{ margin: "0.2rem 0" }}>変更元: {log.source}</p>}
                 <p className="muted" style={{ margin: "0.2rem 0" }}>有効開始日: {log.effectiveFrom}</p>
                 <p className="note" style={{ margin: "0.6rem 0" }}>{log.summary}</p>
                 <div className="table-scroll">

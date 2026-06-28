@@ -7,6 +7,9 @@ import { timeSlotLabels, timeSlotOptions, unitLabels, unitOptions } from "../app
 import { formatNumber } from "../app/utils";
 import { getActivePlanItemsForHorse } from "../logic/dataSelectors";
 import { calculateFeedAmountAsFedKg } from "../logic/nutritionCalculator";
+import { createActiveFeedingPlanRevision } from "../logic/feedingPlanUpdater";
+
+type EditScope = "recordOnly" | "recordAndPlan";
 
 export function FeedingRecordPage({
   horses,
@@ -25,6 +28,12 @@ export function FeedingRecordPage({
   const [amount, setAmount] = useState<number>(1);
   const [unit, setUnit] = useState<FeedUnit>("kg");
   const [memo, setMemo] = useState("");
+  const [editingRecordId, setEditingRecordId] = useState("");
+  const [editAmount, setEditAmount] = useState<number>(1);
+  const [editUnit, setEditUnit] = useState<FeedUnit>("kg");
+  const [editMemo, setEditMemo] = useState("");
+  const [editScope, setEditScope] = useState<EditScope>("recordOnly");
+  const [editReason, setEditReason] = useState("");
 
   const horse = horses.find((h) => h.id === selectedHorseId);
   const feedById = useMemo(() => new Map(feeds.map((f) => [f.id, f])), [feeds]);
@@ -85,6 +94,67 @@ export function FeedingRecordPage({
     await load();
   }
 
+  function startEdit(record: FeedingRecord) {
+    setEditingRecordId(record.id);
+    setEditAmount(record.amount);
+    setEditUnit(record.unit);
+    setEditMemo(record.memo ?? "");
+    setEditScope("recordOnly");
+    setEditReason("");
+  }
+
+  function cancelEdit() {
+    setEditingRecordId("");
+    setEditScope("recordOnly");
+    setEditReason("");
+  }
+
+  async function saveEdit() {
+    const record = records.find((item) => item.id === editingRecordId);
+    if (!record) return;
+    if (!editAmount) return alert("量を入力してください");
+
+    const now = nowIso();
+    const recordPatch = {
+      amount: Number(editAmount),
+      unit: editUnit,
+      memo: editMemo,
+      updatedAt: now
+    };
+
+    if (editScope === "recordOnly") {
+      await db.feedingRecords.update(record.id, recordPatch);
+      cancelEdit();
+      await load();
+      return;
+    }
+
+    const planItems = await getActivePlanItemsForHorse(record.horseId);
+    const targetIndex = planItems.findIndex((item) => item.timeSlot === record.timeSlot && item.feedId === record.feedId);
+    if (targetIndex === -1) {
+      return alert("現在の標準メニューに同じ時間帯・飼料の項目がありません。給餌記録だけ修正するか、先に標準メニューを作成してください。");
+    }
+
+    await db.feedingRecords.update(record.id, recordPatch);
+    await createActiveFeedingPlanRevision({
+      horseId: record.horseId,
+      effectiveFrom: record.date,
+      planName: `給餌記録編集 ${record.date}`,
+      memo: `${record.date} の給餌記録編集から作成`,
+      reason: editReason,
+      source: "給餌記録の編集",
+      items: planItems.map((item, idx) => ({
+        timeSlot: item.timeSlot,
+        feedId: item.feedId,
+        amount: idx === targetIndex ? Number(editAmount) : item.amount,
+        unit: idx === targetIndex ? editUnit : item.unit,
+        sortOrder: item.sortOrder || idx + 1
+      }))
+    });
+    cancelEdit();
+    await load();
+  }
+
   async function copyPlanToDate() {
     if (!selectedHorseId) return;
     const planItems = await getActivePlanItemsForHorse(selectedHorseId);
@@ -142,12 +212,47 @@ export function FeedingRecordPage({
                       <td>{feedById.get(r.feedId)?.name ?? r.feedId}</td>
                       <td>{r.amount} {unitLabels[r.unit]}</td>
                       <td>{r.memo}</td>
-                      <td><button className="danger small" onClick={() => deleteRecord(r.id)}>削除</button></td>
+                      <td>
+                        <div className="button-row">
+                          <button className="secondary small" onClick={() => startEdit(r)}>編集</button>
+                          <button className="danger small" onClick={() => deleteRecord(r.id)}>削除</button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {editingRecordId && (
+              <section className="edit-panel">
+                <h3>給餌記録の編集</h3>
+                <div className="form-grid">
+                  <label className="field"><span>量</span><input type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(Number(e.target.value))} /></label>
+                  <label className="field"><span>単位</span><select value={editUnit} onChange={(e) => setEditUnit(e.target.value as FeedUnit)}>{unitOptions.map((u) => <option key={u} value={u}>{unitLabels[u]}</option>)}</select></label>
+                  <label className="field full"><span>メモ</span><input value={editMemo} onChange={(e) => setEditMemo(e.target.value)} /></label>
+                  <fieldset className="field full radio-field">
+                    <legend>反映範囲</legend>
+                    <label><input type="radio" name="editScope" checked={editScope === "recordOnly"} onChange={() => setEditScope("recordOnly")} /> この日の給餌記録だけ修正する</label>
+                    <label><input type="radio" name="editScope" checked={editScope === "recordAndPlan"} onChange={() => setEditScope("recordAndPlan")} /> この日以降の標準メニューにも反映する</label>
+                  </fieldset>
+                  {editScope === "recordAndPlan" && (
+                    <label className="field full">
+                      <span>変更理由</span>
+                      <input
+                        value={editReason}
+                        onChange={(e) => setEditReason(e.target.value)}
+                        placeholder="運動量増加のため、食べ残しが多いため、体重調整、飼料切替、その他"
+                      />
+                    </label>
+                  )}
+                </div>
+                <div className="button-row">
+                  <button onClick={saveEdit}>保存</button>
+                  <button className="secondary" onClick={cancelEdit}>キャンセル</button>
+                </div>
+              </section>
+            )}
 
             <h3>1日合計</h3>
             <div className="table-scroll">
