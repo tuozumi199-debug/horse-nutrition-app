@@ -19,6 +19,7 @@ export default function App() {
   const [horses, setHorses] = useState<Horse[]>([]);
   const [selectedHorseId, setSelectedHorseId] = useState<string>("");
   const [ready, setReady] = useState(false);
+  const [initError, setInitError] = useState<Error | undefined>();
 
   async function refreshHorses() {
     const list = await db.horses.orderBy("name").toArray();
@@ -27,11 +28,28 @@ export default function App() {
   }
 
   useEffect(() => {
-    seedIfEmpty().then(async () => {
-      await refreshHorses();
-      setReady(true);
-    });
+    seedIfEmpty()
+      .then(async () => {
+        await refreshHorses();
+        setReady(true);
+      })
+      .catch((error) => {
+        console.error("HorseFeed Manager init error", error);
+        setInitError(error instanceof Error ? error : new Error(String(error)));
+      });
   }, []);
+
+  if (initError) {
+    return (
+      <div className="app-error">
+        <h1>アプリの初期化中にエラーが発生しました。</h1>
+        <p>IndexedDBの更新またはPWAキャッシュの不整合が原因の可能性があります。</p>
+        <p>ページを再読み込みしてください。解決しない場合は、下記の内容を開発者へ共有してください。</p>
+        <pre>{initError.message}</pre>
+        <button onClick={() => window.location.reload()}>再読み込み</button>
+      </div>
+    );
+  }
 
   if (!ready) {
     return <div className="loading">HorseFeed Manager を読み込み中...</div>;
