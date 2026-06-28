@@ -4,13 +4,12 @@ import type { Horse } from "../types/horse";
 import type { Feed } from "../types/feed";
 import type { AchievementRow, NutritionIntake, NutritionRequirement } from "../types/nutrition";
 import { AlertBadge } from "../components/AlertBadge";
-import { NutrientRatioPanel } from "../components/NutrientRatioPanel";
 import { NutritionBarChart } from "../components/NutritionBarChart";
 import { NutritionRadarChart } from "../components/NutritionRadarChart";
 import { calculateDailyNutrition, calculateNutritionAchievement } from "../logic/nutritionCalculator";
 import { findRequirementForHorse } from "../logic/requirementCalculator";
 import { calculateNutritionScore } from "../logic/scoreCalculator";
-import { feedingRecordFromItem, getActivePlanItemsForHorse, getEffectiveFeedingItemsForHorseDate } from "../logic/dataSelectors";
+import { feedingRecordFromItem, getActivePlanItemsForHorse } from "../logic/dataSelectors";
 import { formatNumber } from "../app/utils";
 
 export function NutritionAnalysisPage({
@@ -35,16 +34,19 @@ export function NutritionAnalysisPage({
   useEffect(() => {
     async function load() {
       if (!horse) return;
-      const [feedList, reqList, records, effectiveItems, planItems] = await Promise.all([
+      const [feedList, reqList, records] = await Promise.all([
         db.feeds.toArray(),
         db.nutritionRequirements.toArray(),
-        db.feedingRecords.where("[horseId+date]").equals([horse.id, date]).toArray(),
-        getEffectiveFeedingItemsForHorseDate(horse.id, date),
-        getActivePlanItemsForHorse(horse.id)
+        db.feedingRecords.where("[horseId+date]").equals([horse.id, date]).toArray()
       ]);
-      const sourceMode: "record" | "plan" = records.length > 0 || planItems.length === 0 ? "record" : "plan";
+      let sourceItems = records;
+      let sourceMode: "record" | "plan" = "record";
+      if (records.length === 0) {
+        sourceItems = await getActivePlanItemsForHorse(horse.id) as any;
+        sourceMode = "plan";
+      }
       const req = findRequirementForHorse(horse, reqList);
-      const daily = calculateDailyNutrition(effectiveItems.map(feedingRecordFromItem), feedList);
+      const daily = calculateDailyNutrition(sourceItems.map(feedingRecordFromItem), feedList);
       setFeeds(feedList);
       setIntake(daily);
       setRequirement(req);
@@ -60,12 +62,18 @@ export function NutritionAnalysisPage({
     <div className="grid two">
       <section className="card wide">
         <div className="page-heading-row">
-          <div>
-            <h2>栄養バランス分析</h2>
-            <p className="muted">{mode === "record" ? "この日の給餌履歴" : "給餌履歴がないため標準メニュー"}で計算しています。</p>
+          <div className="selected-horse-banner">
+            <span className="selected-horse-label">選択中の馬</span>
+            <strong className="selected-horse-name">{horse.name}</strong>
+            <span className="selected-horse-context">栄養バランス分析</span>
           </div>
           <label className="field compact"><span>分析日</span><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></label>
         </div>
+        <p className="muted">{mode === "record" ? "この日の給餌履歴" : "給餌履歴がないため標準メニュー"}で計算しています。</p>
+      </section>
+
+      <section className="card wide">
+        <h2>栄養バランス分析</h2>
         <div className="score-line"><span>スコア</span><strong>{score}</strong><small>100に近いほど理想値に近い</small></div>
         <NutritionBarChart rows={rows} />
       </section>
@@ -75,13 +83,11 @@ export function NutritionAnalysisPage({
         <NutritionRadarChart rows={rows} />
       </section>
 
-      <NutrientRatioPanel rows={rows} />
-
       <section className="card">
         <h2>摂取量と要求量</h2>
         <div className="table-scroll">
           <table>
-            <thead><tr><th>項目</th><th>現在</th><th>理想</th><th>達成</th><th>判定</th></tr></thead>
+            <thead><tr><th>項目</th><th>現在</th><th>理想</th><th>達成率</th><th>判定</th></tr></thead>
             <tbody>
               {rows.map((row) => (
                 <tr key={row.key}>
@@ -98,10 +104,10 @@ export function NutritionAnalysisPage({
       </section>
 
       <section className="card">
-        <h2>解釈メモ</h2>
+        <h2>解析メモ</h2>
         <ul className="tips">
           <li>100%は登録された要求量に対する達成率です。</li>
-          <li>エネルギー、タンパク、Ca/P、Na、Seなどは過不足の影響が大きいため優先して確認します。</li>
+          <li>エネルギー、タンパク、Ca/P、Na、Seなどは過不足の影響が大きいため優先して確認してください。</li>
           <li>乾物摂取量、糖・デンプン、持病、運動量、体重変化は獣医師・栄養士の判断も入れて調整してください。</li>
           <li>現在の登録飼料数: {feeds.length}件。飼料マスタはいつでも更新できます。</li>
         </ul>
