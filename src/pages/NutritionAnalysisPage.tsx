@@ -4,6 +4,7 @@ import type { Horse } from "../types/horse";
 import type { Feed } from "../types/feed";
 import type { AchievementRow, NutritionIntake, NutritionRequirement } from "../types/nutrition";
 import { AlertBadge } from "../components/AlertBadge";
+import { NutrientRatioPanel } from "../components/NutrientRatioPanel";
 import { NutritionBarChart } from "../components/NutritionBarChart";
 import { NutritionRadarChart } from "../components/NutritionRadarChart";
 import { calculateDailyNutrition, calculateNutritionAchievement } from "../logic/nutritionCalculator";
@@ -76,6 +77,8 @@ export function NutritionAnalysisPage({
         <h2>レーダー表示</h2>
         <NutritionRadarChart rows={rows} />
       </section>
+
+      <NutrientRatioPanel rows={rows} />
 
       <section className="card">
         <h2>摂取量と要求量</h2>
