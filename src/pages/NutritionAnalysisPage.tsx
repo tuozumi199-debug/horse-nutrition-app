@@ -10,7 +10,7 @@ import { NutritionRadarChart } from "../components/NutritionRadarChart";
 import { calculateDailyNutrition, calculateNutritionAchievement } from "../logic/nutritionCalculator";
 import { findRequirementForHorse } from "../logic/requirementCalculator";
 import { calculateNutritionScore } from "../logic/scoreCalculator";
-import { feedingRecordFromItem, getActivePlanItemsForHorse } from "../logic/dataSelectors";
+import { feedingRecordFromItem, getActivePlanItemsForHorse, getEffectiveFeedingItemsForHorseDate } from "../logic/dataSelectors";
 import { formatNumber } from "../app/utils";
 
 export function NutritionAnalysisPage({
@@ -35,19 +35,16 @@ export function NutritionAnalysisPage({
   useEffect(() => {
     async function load() {
       if (!horse) return;
-      const [feedList, reqList, records] = await Promise.all([
+      const [feedList, reqList, records, effectiveItems, planItems] = await Promise.all([
         db.feeds.toArray(),
         db.nutritionRequirements.toArray(),
-        db.feedingRecords.where("[horseId+date]").equals([horse.id, date]).toArray()
+        db.feedingRecords.where("[horseId+date]").equals([horse.id, date]).toArray(),
+        getEffectiveFeedingItemsForHorseDate(horse.id, date),
+        getActivePlanItemsForHorse(horse.id)
       ]);
-      let sourceItems = records;
-      let sourceMode: "record" | "plan" = "record";
-      if (records.length === 0) {
-        sourceItems = await getActivePlanItemsForHorse(horse.id) as any;
-        sourceMode = "plan";
-      }
+      const sourceMode: "record" | "plan" = records.length > 0 || planItems.length === 0 ? "record" : "plan";
       const req = findRequirementForHorse(horse, reqList);
-      const daily = calculateDailyNutrition(sourceItems.map(feedingRecordFromItem), feedList);
+      const daily = calculateDailyNutrition(effectiveItems.map(feedingRecordFromItem), feedList);
       setFeeds(feedList);
       setIntake(daily);
       setRequirement(req);

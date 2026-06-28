@@ -11,6 +11,10 @@ export type FeedingRecord = {
   amount: number;
   unit: FeedUnit;
   memo?: string;
+  recordKind?: "manual" | "exception_override" | "exception_add" | "exception_skip" | "memo";
+  source?: "manual" | "standard_exception";
+  basePlanItemId?: string;
+  isException?: boolean;
   createdAt: string;
   updatedAt: string;
 };

@@ -112,6 +112,7 @@ tr.clickable-row:hover { background: #fff4e4; }
 .feeding-record-list { display: flex; flex-direction: column; gap: 0.55rem; }
 .feeding-record-card { border: 1px solid rgba(222, 213, 197, 0.95); border-radius: 14px; background: rgba(255, 255, 255, 0.78); padding: 0.75rem; }
 .feeding-record-card.editing { border-color: var(--slot-line); box-shadow: 0 0 0 3px rgba(122, 79, 43, 0.12); background: #ffffff; }
+.feeding-record-card.has-exception { background: rgba(255, 250, 241, 0.98); }
 .feeding-record-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: start; }
 .record-title-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .record-title-row strong { color: var(--text); }
@@ -120,7 +121,12 @@ tr.clickable-row:hover { background: #fff4e4; }
 .record-memo { color: var(--muted); overflow-wrap: anywhere; }
 .record-actions { display: flex; gap: 0.45rem; flex-wrap: wrap; justify-content: flex-end; }
 .editing-badge { background: #fff1ca; color: var(--warn); }
+.exception-badge { background: #e4f0dc; color: #386c35; }
 .inline-edit-panel { margin-top: 0.75rem; border-color: var(--slot-line); background: rgba(255, 250, 241, 0.96); }
+.exception-summary { border: 1px solid var(--line); border-radius: 16px; background: var(--surface-strong); padding: 0.85rem; margin: 1rem 0; }
+.exception-summary h3 { margin: 0 0 0.55rem; color: var(--accent-dark); }
+.exception-summary ul { margin: 0; padding-left: 1.2rem; color: var(--muted); }
+.exception-summary li { margin: 0.25rem 0; }
 .radio-field { border: 1px solid var(--line); border-radius: 12px; padding: 0.75rem; }
 .radio-field legend { padding: 0 0.3rem; font-size: 0.9rem; }
 .radio-field label { display: flex; align-items: center; gap: 0.45rem; color: var(--text); font-weight: 600; }
