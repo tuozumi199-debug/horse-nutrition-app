@@ -49,6 +49,14 @@ export function FeedingRecordPage({
     }
     return Array.from(totals.values()).sort((a, b) => a.feedName.localeCompare(b.feedName));
   }, [records, feedById]);
+  const groupedRecords = useMemo(() => {
+    return timeSlotOptions
+      .map((slot) => ({
+        slot,
+        records: records.filter((record) => record.timeSlot === slot)
+      }))
+      .filter((group) => group.records.length > 0);
+  }, [records]);
 
   async function load() {
     const feedList = (await db.feeds.toArray()).filter((feed) => feed.isActive);
@@ -202,57 +210,70 @@ export function FeedingRecordPage({
         <p className="muted">栄養状態・使用量は、下記4回分を合算した1日合計で計算します。</p>
         {records.length === 0 ? <p className="empty">まだ記録がありません。</p> : (
           <>
-            <div className="table-scroll">
-              <table>
-                <thead><tr><th>時間帯</th><th>飼料</th><th>量</th><th>メモ</th><th></th></tr></thead>
-                <tbody>
-                  {records.map((r) => (
-                    <tr key={r.id}>
-                      <td>{timeSlotLabels[r.timeSlot]}</td>
-                      <td>{feedById.get(r.feedId)?.name ?? r.feedId}</td>
-                      <td>{r.amount} {unitLabels[r.unit]}</td>
-                      <td>{r.memo}</td>
-                      <td>
-                        <div className="button-row">
-                          <button className="secondary small" onClick={() => startEdit(r)}>編集</button>
-                          <button className="danger small" onClick={() => deleteRecord(r.id)}>削除</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <div className="feeding-record-groups">
+              {groupedRecords.map((group) => (
+                <section className={`feeding-slot-group slot-${group.slot}`} key={group.slot}>
+                  <div className="feeding-slot-heading">
+                    <h3>{timeSlotLabels[group.slot]}</h3>
+                    <span>{group.records.length}件</span>
+                  </div>
+                  <div className="feeding-record-list">
+                    {group.records.map((r) => {
+                      const isEditing = editingRecordId === r.id;
+                      const feedName = feedById.get(r.feedId)?.name ?? r.feedId;
+                      return (
+                        <article className={`feeding-record-card ${isEditing ? "editing" : ""}`} key={r.id}>
+                          <div className="feeding-record-main">
+                            <div>
+                              <div className="record-title-row">
+                                <strong>{feedName}</strong>
+                                {isEditing && <span className="badge editing-badge">編集中</span>}
+                              </div>
+                              <p className="record-meta">{timeSlotLabels[r.timeSlot]} / {r.amount} {unitLabels[r.unit]}</p>
+                              {r.memo && <p className="record-memo">{r.memo}</p>}
+                            </div>
+                            <div className="record-actions">
+                              <button className="secondary small" onClick={() => startEdit(r)}>編集</button>
+                              <button className="danger small" onClick={() => deleteRecord(r.id)}>削除</button>
+                            </div>
+                          </div>
 
-            {editingRecordId && (
-              <section className="edit-panel">
-                <h3>給餌記録の編集</h3>
-                <div className="form-grid">
-                  <label className="field"><span>量</span><input type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(Number(e.target.value))} /></label>
-                  <label className="field"><span>単位</span><select value={editUnit} onChange={(e) => setEditUnit(e.target.value as FeedUnit)}>{unitOptions.map((u) => <option key={u} value={u}>{unitLabels[u]}</option>)}</select></label>
-                  <label className="field full"><span>メモ</span><input value={editMemo} onChange={(e) => setEditMemo(e.target.value)} /></label>
-                  <fieldset className="field full radio-field">
-                    <legend>反映範囲</legend>
-                    <label><input type="radio" name="editScope" checked={editScope === "recordOnly"} onChange={() => setEditScope("recordOnly")} /> この日の給餌記録だけ修正する</label>
-                    <label><input type="radio" name="editScope" checked={editScope === "recordAndPlan"} onChange={() => setEditScope("recordAndPlan")} /> この日以降の標準メニューにも反映する</label>
-                  </fieldset>
-                  {editScope === "recordAndPlan" && (
-                    <label className="field full">
-                      <span>変更理由</span>
-                      <input
-                        value={editReason}
-                        onChange={(e) => setEditReason(e.target.value)}
-                        placeholder="運動量増加のため、食べ残しが多いため、体重調整、飼料切替、その他"
-                      />
-                    </label>
-                  )}
-                </div>
-                <div className="button-row">
-                  <button onClick={saveEdit}>保存</button>
-                  <button className="secondary" onClick={cancelEdit}>キャンセル</button>
-                </div>
-              </section>
-            )}
+                          {isEditing && (
+                            <section className="edit-panel inline-edit-panel">
+                              <h3>編集中：{timeSlotLabels[r.timeSlot]} / {feedName}</h3>
+                              <div className="form-grid">
+                                <label className="field"><span>量</span><input type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(Number(e.target.value))} /></label>
+                                <label className="field"><span>単位</span><select value={editUnit} onChange={(e) => setEditUnit(e.target.value as FeedUnit)}>{unitOptions.map((u) => <option key={u} value={u}>{unitLabels[u]}</option>)}</select></label>
+                                <label className="field full"><span>メモ</span><input value={editMemo} onChange={(e) => setEditMemo(e.target.value)} /></label>
+                                <fieldset className="field full radio-field">
+                                  <legend>反映範囲</legend>
+                                  <label><input type="radio" name="editScope" checked={editScope === "recordOnly"} onChange={() => setEditScope("recordOnly")} /> この日の給餌記録だけ修正する</label>
+                                  <label><input type="radio" name="editScope" checked={editScope === "recordAndPlan"} onChange={() => setEditScope("recordAndPlan")} /> この日以降の標準メニューにも反映する</label>
+                                </fieldset>
+                                {editScope === "recordAndPlan" && (
+                                  <label className="field full">
+                                    <span>変更理由</span>
+                                    <input
+                                      value={editReason}
+                                      onChange={(e) => setEditReason(e.target.value)}
+                                      placeholder="運動量増加のため、食べ残しが多いため、体重調整、飼料切替、その他"
+                                    />
+                                  </label>
+                                )}
+                              </div>
+                              <div className="button-row">
+                                <button onClick={saveEdit}>保存</button>
+                                <button className="secondary" onClick={cancelEdit}>キャンセル</button>
+                              </div>
+                            </section>
+                          )}
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
+            </div>
 
             <h3>1日合計</h3>
             <div className="table-scroll">
