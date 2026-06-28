@@ -1,6 +1,6 @@
 import type { Horse } from "../types/horse";
 import type { Feed } from "../types/feed";
-import type { FeedingPlan, FeedingPlanItem, FeedingRecord } from "../types/feeding";
+import type { FeedingPlan, FeedingPlanChangeLog, FeedingPlanItem, FeedingRecord } from "../types/feeding";
 import type { NutritionRequirement } from "../types/nutrition";
 import type { SimulationItem, SimulationScenario } from "../types/simulation";
 
@@ -10,6 +10,7 @@ export type DbSchema = {
   feedingRecords: FeedingRecord;
   feedingPlans: FeedingPlan;
   feedingPlanItems: FeedingPlanItem;
+  feedingPlanChangeLogs: FeedingPlanChangeLog;
   nutritionRequirements: NutritionRequirement;
   simulationScenarios: SimulationScenario;
   simulationItems: SimulationItem;

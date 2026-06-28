@@ -31,6 +31,7 @@ export function SimulationPage({
   const [simRows, setSimRows] = useState<AchievementRow[]>([]);
   const [savedScenarioId, setSavedScenarioId] = useState<string>("");
   const [scenarioName, setScenarioName] = useState("栄養調整案");
+  const [changeReason, setChangeReason] = useState("");
   const [amountInputs, setAmountInputs] = useState<Record<string, string>>({});
 
   const horse = horses.find((h) => h.id === selectedHorseId);
@@ -319,10 +320,12 @@ export function SimulationPage({
     await applySimulationToPlan(
       savedScenarioId,
       todayIso(),
-      `${scenarioName} 反映版`
+      `${scenarioName} 反映版`,
+      changeReason
     );
 
     alert("新しい標準メニューとして反映しました");
+    setChangeReason("");
     await load();
   }
 
@@ -495,6 +498,15 @@ export function SimulationPage({
           </label>
 
           <button onClick={saveScenario}>案を保存</button>
+
+          <label className="field compact">
+            <span>変更理由</span>
+            <input
+              value={changeReason}
+              onChange={(e) => setChangeReason(e.target.value)}
+              placeholder="運動量増加、体重調整など"
+            />
+          </label>
 
           <button className="secondary" onClick={applyScenario}>
             標準メニューへ反映

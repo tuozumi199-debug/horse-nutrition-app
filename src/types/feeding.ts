@@ -36,3 +36,27 @@ export type FeedingPlanItem = {
   unit: FeedUnit;
   sortOrder: number;
 };
+
+export type FeedingPlanChangeDiffItem = {
+  feedId: string;
+  feedName: string;
+  mealSlot?: TimeSlot;
+  beforeAmount?: number;
+  afterAmount?: number;
+  unit?: FeedUnit;
+  changeType: "added" | "removed" | "changed";
+};
+
+export type FeedingPlanChangeLog = {
+  id: string;
+  horseId: string;
+  oldPlanId?: string;
+  newPlanId: string;
+  changeDate: string;
+  effectiveFrom: string;
+  reason?: string;
+  summary: string;
+  diffItems?: FeedingPlanChangeDiffItem[];
+  createdAt: string;
+  updatedAt?: string;
+};

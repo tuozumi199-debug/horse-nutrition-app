@@ -1,7 +1,7 @@
 import Dexie, { type Table } from "dexie";
 import type { Horse } from "../types/horse";
 import type { Feed } from "../types/feed";
-import type { FeedingPlan, FeedingPlanItem, FeedingRecord } from "../types/feeding";
+import type { FeedingPlan, FeedingPlanChangeLog, FeedingPlanItem, FeedingRecord } from "../types/feeding";
 import type { NutritionRequirement } from "../types/nutrition";
 import type { SimulationItem, SimulationScenario } from "../types/simulation";
 
@@ -11,6 +11,7 @@ export class HorseFeedDb extends Dexie {
   feedingRecords!: Table<FeedingRecord, string>;
   feedingPlans!: Table<FeedingPlan, string>;
   feedingPlanItems!: Table<FeedingPlanItem, string>;
+  feedingPlanChangeLogs!: Table<FeedingPlanChangeLog, string>;
   nutritionRequirements!: Table<NutritionRequirement, string>;
   simulationScenarios!: Table<SimulationScenario, string>;
   simulationItems!: Table<SimulationItem, string>;
@@ -23,6 +24,17 @@ export class HorseFeedDb extends Dexie {
       feedingRecords: "id, horseId, date, [horseId+date], feedId",
       feedingPlans: "id, horseId, status, effectiveFrom",
       feedingPlanItems: "id, feedingPlanId, feedId",
+      nutritionRequirements: "id, [stage+activityLevel], weightKg",
+      simulationScenarios: "id, horseId, status, createdAt",
+      simulationItems: "id, scenarioId, feedId"
+    });
+    this.version(2).stores({
+      horses: "id, name, stage, activityLevel, updatedAt",
+      feeds: "id, name, category, updatedAt",
+      feedingRecords: "id, horseId, date, [horseId+date], feedId",
+      feedingPlans: "id, horseId, status, effectiveFrom",
+      feedingPlanItems: "id, feedingPlanId, feedId",
+      feedingPlanChangeLogs: "id, horseId, changeDate, effectiveFrom, createdAt, [horseId+changeDate]",
       nutritionRequirements: "id, [stage+activityLevel], weightKg",
       simulationScenarios: "id, horseId, status, createdAt",
       simulationItems: "id, scenarioId, feedId"

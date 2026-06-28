@@ -1,4 +1,4 @@
-export type PageKey = "dashboard" | "horses" | "feeds" | "records" | "analysis" | "simulation" | "summary" | "settings";
+export type PageKey = "dashboard" | "horses" | "feeds" | "records" | "analysis" | "simulation" | "history" | "summary" | "settings";
 
 export const pages: { key: PageKey; label: string }[] = [
   { key: "dashboard", label: "ホーム" },
@@ -7,6 +7,7 @@ export const pages: { key: PageKey; label: string }[] = [
   { key: "records", label: "給餌" },
   { key: "analysis", label: "栄養" },
   { key: "simulation", label: "シミュレーション" },
+  { key: "history", label: "履歴" },
   { key: "summary", label: "月次" },
   { key: "settings", label: "設定" }
 ];

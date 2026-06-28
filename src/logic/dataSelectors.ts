@@ -1,5 +1,5 @@
 import { db, todayIso } from "../db/localDb";
-import type { FeedingPlanItem, FeedingRecord } from "../types/feeding";
+import type { FeedingPlan, FeedingPlanItem, FeedingRecord } from "../types/feeding";
 
 export async function getTodayItemsForHorse(horseId: string) {
   const today = todayIso();
@@ -9,11 +9,14 @@ export async function getTodayItemsForHorse(horseId: string) {
 }
 
 export async function getActivePlanItemsForHorse(horseId: string): Promise<FeedingPlanItem[]> {
-  const plans = await db.feedingPlans.where("horseId").equals(horseId).toArray();
-  const activePlans = plans.filter((p) => p.status === "active").sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom));
-  const plan = activePlans[0];
+  const plan = await getActivePlanForHorse(horseId);
   if (!plan) return [];
   return db.feedingPlanItems.where("feedingPlanId").equals(plan.id).sortBy("sortOrder");
+}
+
+export async function getActivePlanForHorse(horseId: string): Promise<FeedingPlan | undefined> {
+  const plans = await db.feedingPlans.where("horseId").equals(horseId).toArray();
+  return plans.filter((p) => p.status === "active").sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom))[0];
 }
 
 export function feedingRecordFromItem(item: FeedingPlanItem | FeedingRecord) {

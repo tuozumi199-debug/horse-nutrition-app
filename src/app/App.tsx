@@ -9,6 +9,7 @@ import { FeedMasterPage } from "../pages/FeedMasterPage";
 import { FeedingRecordPage } from "../pages/FeedingRecordPage";
 import { NutritionAnalysisPage } from "../pages/NutritionAnalysisPage";
 import { SimulationPage } from "../pages/SimulationPage";
+import { FeedingPlanHistoryPage } from "../pages/FeedingPlanHistoryPage";
 import { MonthlySummaryPage } from "../pages/MonthlySummaryPage";
 import { SettingsPage } from "../pages/SettingsPage";
 import { HorseSelector } from "../components/HorseSelector";
@@ -63,6 +64,7 @@ export default function App() {
         {page === "records" && <FeedingRecordPage {...commonProps} />}
         {page === "analysis" && <NutritionAnalysisPage {...commonProps} />}
         {page === "simulation" && <SimulationPage {...commonProps} />}
+        {page === "history" && <FeedingPlanHistoryPage horses={horses} />}
         {page === "summary" && <MonthlySummaryPage />}
         {page === "settings" && <SettingsPage refreshHorses={refreshHorses} />}
       </main>

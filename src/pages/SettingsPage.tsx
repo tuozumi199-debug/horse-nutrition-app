@@ -56,6 +56,7 @@ export function SettingsPage({ refreshHorses }: { refreshHorses: () => Promise<v
       feedingRecords: await db.feedingRecords.toArray(),
       feedingPlans: await db.feedingPlans.toArray(),
       feedingPlanItems: await db.feedingPlanItems.toArray(),
+      feedingPlanChangeLogs: await db.feedingPlanChangeLogs.toArray(),
       nutritionRequirements: await db.nutritionRequirements.toArray(),
       simulationScenarios: await db.simulationScenarios.toArray(),
       simulationItems: await db.simulationItems.toArray()
@@ -73,12 +74,13 @@ export function SettingsPage({ refreshHorses }: { refreshHorses: () => Promise<v
     if (!confirm("現在のローカルデータにバックアップ内容を上書き投入します。続行しますか？")) return;
     const text = await file.text();
     const payload = JSON.parse(text);
-    await db.transaction("rw", [db.horses, db.feeds, db.feedingRecords, db.feedingPlans, db.feedingPlanItems, db.nutritionRequirements, db.simulationScenarios, db.simulationItems], async () => {
+    await db.transaction("rw", [db.horses, db.feeds, db.feedingRecords, db.feedingPlans, db.feedingPlanItems, db.feedingPlanChangeLogs, db.nutritionRequirements, db.simulationScenarios, db.simulationItems], async () => {
       if (payload.horses) await db.horses.bulkPut(payload.horses);
       if (payload.feeds) await db.feeds.bulkPut(payload.feeds);
       if (payload.feedingRecords) await db.feedingRecords.bulkPut(payload.feedingRecords);
       if (payload.feedingPlans) await db.feedingPlans.bulkPut(payload.feedingPlans);
       if (payload.feedingPlanItems) await db.feedingPlanItems.bulkPut(payload.feedingPlanItems);
+      if (payload.feedingPlanChangeLogs) await db.feedingPlanChangeLogs.bulkPut(payload.feedingPlanChangeLogs);
       if (payload.nutritionRequirements) await db.nutritionRequirements.bulkPut(payload.nutritionRequirements);
       if (payload.simulationScenarios) await db.simulationScenarios.bulkPut(payload.simulationScenarios);
       if (payload.simulationItems) await db.simulationItems.bulkPut(payload.simulationItems);
