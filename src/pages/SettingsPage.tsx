@@ -5,6 +5,7 @@ import type { NutritionRequirement } from "../types/nutrition";
 import { activityLabels, activityOptions, stageLabels, stageOptions } from "../app/labels";
 import { downloadCsv } from "../logic/csvExporter";
 import { formatNumber } from "../app/utils";
+import { getStoredTheme, setStoredTheme, themeOptions, type ThemeId } from "../logic/theme";
 
 type RequirementDraft = Omit<NutritionRequirement, "id" | "createdAt" | "updatedAt"> & { id?: string };
 
@@ -23,6 +24,7 @@ const emptyRequirement: RequirementDraft = {
 export function SettingsPage({ refreshHorses }: { refreshHorses: () => Promise<void> }) {
   const [requirements, setRequirements] = useState<NutritionRequirement[]>([]);
   const [draft, setDraft] = useState<RequirementDraft>(emptyRequirement);
+  const [selectedTheme, setSelectedTheme] = useState<ThemeId>(() => getStoredTheme());
 
   async function load() {
     setRequirements(await db.nutritionRequirements.toArray());
@@ -56,7 +58,6 @@ export function SettingsPage({ refreshHorses }: { refreshHorses: () => Promise<v
       feedingRecords: await db.feedingRecords.toArray(),
       feedingPlans: await db.feedingPlans.toArray(),
       feedingPlanItems: await db.feedingPlanItems.toArray(),
-      feedingPlanChangeLogs: await db.feedingPlanChangeLogs.toArray(),
       nutritionRequirements: await db.nutritionRequirements.toArray(),
       simulationScenarios: await db.simulationScenarios.toArray(),
       simulationItems: await db.simulationItems.toArray()
@@ -74,13 +75,12 @@ export function SettingsPage({ refreshHorses }: { refreshHorses: () => Promise<v
     if (!confirm("現在のローカルデータにバックアップ内容を上書き投入します。続行しますか？")) return;
     const text = await file.text();
     const payload = JSON.parse(text);
-    await db.transaction("rw", [db.horses, db.feeds, db.feedingRecords, db.feedingPlans, db.feedingPlanItems, db.feedingPlanChangeLogs, db.nutritionRequirements, db.simulationScenarios, db.simulationItems], async () => {
+    await db.transaction("rw", [db.horses, db.feeds, db.feedingRecords, db.feedingPlans, db.feedingPlanItems, db.nutritionRequirements, db.simulationScenarios, db.simulationItems], async () => {
       if (payload.horses) await db.horses.bulkPut(payload.horses);
       if (payload.feeds) await db.feeds.bulkPut(payload.feeds);
       if (payload.feedingRecords) await db.feedingRecords.bulkPut(payload.feedingRecords);
       if (payload.feedingPlans) await db.feedingPlans.bulkPut(payload.feedingPlans);
       if (payload.feedingPlanItems) await db.feedingPlanItems.bulkPut(payload.feedingPlanItems);
-      if (payload.feedingPlanChangeLogs) await db.feedingPlanChangeLogs.bulkPut(payload.feedingPlanChangeLogs);
       if (payload.nutritionRequirements) await db.nutritionRequirements.bulkPut(payload.nutritionRequirements);
       if (payload.simulationScenarios) await db.simulationScenarios.bulkPut(payload.simulationScenarios);
       if (payload.simulationItems) await db.simulationItems.bulkPut(payload.simulationItems);
@@ -106,8 +106,39 @@ export function SettingsPage({ refreshHorses }: { refreshHorses: () => Promise<v
     })));
   }
 
+  function handleThemeChange(themeId: ThemeId) {
+    setSelectedTheme(themeId);
+    setStoredTheme(themeId);
+  }
+
   return (
     <div className="grid two">
+      <section className="card wide">
+        <h2>スキン設定</h2>
+        <div className="theme-grid" role="radiogroup" aria-label="スキン設定">
+          {themeOptions.map((theme) => (
+            <label className={`theme-option ${selectedTheme === theme.id ? "active" : ""}`} key={theme.id}>
+              <input
+                type="radio"
+                name="theme"
+                value={theme.id}
+                checked={selectedTheme === theme.id}
+                onChange={() => handleThemeChange(theme.id)}
+              />
+              <span className="theme-preview" aria-hidden="true">
+                {theme.swatches.map((color) => (
+                  <span key={color} style={{ background: color }} />
+                ))}
+              </span>
+              <span>
+                <strong>{theme.name}</strong>
+                <small>{theme.description}</small>
+              </span>
+            </label>
+          ))}
+        </div>
+      </section>
+
       <section className="card">
         <h2>栄養要求量マスタ</h2>
         <p className="note">馬のステージ・活動量・体重ごとの理想値を登録します。NRC、教科書、論文、分析機関の値は出典名と版を残してください。</p>
