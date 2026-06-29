@@ -401,6 +401,28 @@ tr.clickable-row:hover { background: var(--hover-bg); }
 .theme-option small { color: var(--muted); font-weight: 500; }
 .theme-preview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; height: 34px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
 .theme-preview span { min-width: 0; }
+.home-layout, .workspace-layout { display: grid; gap: 1rem; }
+.section-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 0.8rem; }
+.section-heading h2 { margin-bottom: 0.25rem; }
+.home-horse-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+.home-horse-button { min-height: 96px; display: flex; align-items: center; justify-content: flex-start; gap: 0.75rem; text-align: left; background: var(--surface-strong); color: var(--text); border: 1px solid var(--line); box-shadow: none; }
+.home-horse-button.selected { border-color: var(--accent); outline: 3px solid var(--accent-soft); }
+.home-horse-button img { width: 58px; height: 58px; border-radius: 16px; object-fit: cover; background: var(--accent-soft); flex: 0 0 auto; }
+.home-horse-button strong, .home-horse-button small, .management-grid small, .section-menu small { display: block; }
+.home-horse-button small, .management-grid small, .section-menu small { color: var(--muted); font-weight: 600; margin-top: 0.15rem; }
+.management-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+.management-grid button { min-height: 88px; text-align: left; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.section-menu, .workspace-tabs, .subtabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.section-menu button, .workspace-tabs button, .subtabs button { background: var(--surface-strong); color: var(--accent-dark); border: 1px solid var(--line); box-shadow: none; text-align: left; }
+.section-menu button.active, .workspace-tabs button.active, .subtabs button.active { background: var(--accent); color: white; border-color: var(--accent); }
+.section-menu button.active small { color: rgba(255, 255, 255, 0.82); }
+.workspace-horse-banner { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+.horse-name-row { display: flex; align-items: center; gap: 0.85rem; min-width: 0; }
+.horse-name-row img { width: 66px; height: 66px; border-radius: 18px; object-fit: cover; background: var(--accent-soft); flex: 0 0 auto; }
+.horse-title-line { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; }
+.horse-class-badge-slot { min-width: 3.5rem; min-height: 1.45rem; border-radius: 999px; border: 1px dashed var(--line); background: var(--surface-strong); }
+.workspace-nav-card { box-shadow: none; }
+.placeholder-panel { min-height: 160px; display: flex; flex-direction: column; justify-content: center; }
 
 @media (max-width: 860px) {
   .app-shell { padding: 0.75rem; }
@@ -410,6 +432,7 @@ tr.clickable-row:hover { background: var(--hover-bg); }
   .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .time-slot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .theme-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-horse-grid, .management-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .page-heading-row { flex-direction: column; }
   th, td { padding: 0.58rem; }
 }
@@ -418,6 +441,11 @@ tr.clickable-row:hover { background: var(--hover-bg); }
   .metrics { grid-template-columns: 1fr; }
   .time-slot-grid { grid-template-columns: 1fr; }
   .theme-grid { grid-template-columns: 1fr; }
+  .home-horse-grid, .management-grid { grid-template-columns: 1fr; }
+  .home-horse-button, .management-grid button { min-height: 76px; }
+  .section-menu, .workspace-tabs, .subtabs { display: grid; grid-template-columns: 1fr; }
+  .workspace-horse-banner { align-items: stretch; }
+  .horse-name-row { align-items: flex-start; }
   .slot-feed-list li.with-action { grid-template-columns: 1fr; align-items: stretch; }
   .record-actions { justify-content: flex-start; }
   .score-box { flex-direction: column; align-items: flex-start; }

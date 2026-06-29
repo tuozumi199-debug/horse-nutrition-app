@@ -1,13 +1,8 @@
-export type PageKey = "dashboard" | "horses" | "feeds" | "records" | "analysis" | "simulation" | "history" | "summary" | "settings";
+export type PageKey = "home" | "workspace" | "register" | "stable" | "settings";
 
-export const pages: { key: PageKey; label: string }[] = [
-  { key: "dashboard", label: "ホーム" },
-  { key: "horses", label: "馬" },
-  { key: "feeds", label: "飼料" },
-  { key: "records", label: "給餌" },
-  { key: "analysis", label: "栄養" },
-  { key: "simulation", label: "シミュレーション" },
-  { key: "history", label: "履歴" },
-  { key: "summary", label: "月次" },
+export const pages: { key: Exclude<PageKey, "workspace">; label: string }[] = [
+  { key: "home", label: "ホーム" },
+  { key: "register", label: "登録" },
+  { key: "stable", label: "厩舎" },
   { key: "settings", label: "設定" }
 ];

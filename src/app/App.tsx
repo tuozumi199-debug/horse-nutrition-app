@@ -4,18 +4,15 @@ import { seedIfEmpty } from "../db/seed";
 import type { Horse } from "../types/horse";
 import { pages, type PageKey } from "./routes";
 import { DashboardPage } from "../pages/DashboardPage";
-import { HorseListPage } from "../pages/HorseListPage";
-import { FeedMasterPage } from "../pages/FeedMasterPage";
-import { FeedingRecordPage } from "../pages/FeedingRecordPage";
-import { NutritionAnalysisPage } from "../pages/NutritionAnalysisPage";
-import { SimulationPage } from "../pages/SimulationPage";
-import { MonthlySummaryPage } from "../pages/MonthlySummaryPage";
+import { HorseWorkspacePage } from "../pages/HorseWorkspacePage";
+import { RegisterPage } from "../pages/RegisterPage";
+import { StablePage } from "../pages/StablePage";
 import { SettingsPage } from "../pages/SettingsPage";
 import { HorseSelector } from "../components/HorseSelector";
 import { initializeStoredTheme } from "../logic/theme";
 
 export default function App() {
-  const [page, setPage] = useState<PageKey>("dashboard");
+  const [page, setPage] = useState<PageKey>("home");
   const [horses, setHorses] = useState<Horse[]>([]);
   const [selectedHorseId, setSelectedHorseId] = useState<string>("");
   const [ready, setReady] = useState(false);
@@ -24,6 +21,11 @@ export default function App() {
     const list = await db.horses.orderBy("name").toArray();
     setHorses(list);
     setSelectedHorseId((prev) => prev || list.find((h) => h.isActive)?.id || "");
+  }
+
+  function openHorseWorkspace(horseId: string) {
+    setSelectedHorseId(horseId);
+    setPage("workspace");
   }
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function App() {
       <header className="topbar">
         <div>
           <h1>HorseFeed Manager</h1>
-          <p>馬の給餌・栄養バランス管理PWA</p>
+          <p>馬ごとの給餌・栄養・厩舎管理PWA</p>
         </div>
         <HorseSelector horses={horses} selectedHorseId={selectedHorseId} onChange={setSelectedHorseId} />
       </header>
@@ -56,16 +58,25 @@ export default function App() {
             {p.label}
           </button>
         ))}
+        {page === "workspace" && (
+          <button className="active" onClick={() => selectedHorseId && setPage("workspace")}>
+            馬別ワークスペース
+          </button>
+        )}
       </nav>
 
       <main className="main-content">
-        {page === "dashboard" && <DashboardPage {...commonProps} goTo={setPage} />}
-        {page === "horses" && <HorseListPage {...commonProps} />}
-        {page === "feeds" && <FeedMasterPage />}
-        {page === "records" && <FeedingRecordPage {...commonProps} />}
-        {page === "analysis" && <NutritionAnalysisPage {...commonProps} />}
-        {page === "simulation" && <SimulationPage {...commonProps} />}
-        {page === "summary" && <MonthlySummaryPage />}
+        {page === "home" && (
+          <DashboardPage
+            horses={horses}
+            selectedHorseId={selectedHorseId}
+            onSelectHorse={openHorseWorkspace}
+            goTo={setPage}
+          />
+        )}
+        {page === "workspace" && <HorseWorkspacePage {...commonProps} />}
+        {page === "register" && <RegisterPage {...commonProps} />}
+        {page === "stable" && <StablePage />}
         {page === "settings" && <SettingsPage refreshHorses={refreshHorses} />}
       </main>
     </div>
