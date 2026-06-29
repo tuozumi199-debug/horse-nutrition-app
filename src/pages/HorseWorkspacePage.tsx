@@ -1,8 +1,10 @@
 import { useState } from "react";
 import type { Horse } from "../types/horse";
+import { getHorseClass, getHorseClassLabel } from "../logic/horseClass";
 import { FeedingRecordPage } from "./FeedingRecordPage";
 import { NutritionAnalysisPage } from "./NutritionAnalysisPage";
 import { SimulationPage } from "./SimulationPage";
+import { FeedingPlanHistoryPage } from "./FeedingPlanHistoryPage";
 
 type WorkspaceTab = "overview" | "feeding" | "nutrition" | "medication" | "history";
 type NutritionView = "analysis" | "simulation";
@@ -49,7 +51,7 @@ export function HorseWorkspacePage({
             <span className="selected-horse-label">選択中の馬</span>
             <div className="horse-title-line">
               <strong className="selected-horse-name">{horse.name}</strong>
-              <span className="horse-class-badge-slot" aria-label="馬クラスバッジ表示予定" />
+              <span className={`horse-class-badge horse-class-${getHorseClass(horse)}`}>{getHorseClassLabel(horse)}</span>
             </div>
             <span className="selected-horse-context">馬別ワークスペース</span>
           </div>
@@ -114,12 +116,7 @@ export function HorseWorkspacePage({
           <p className="muted">ワクチン・薬剤登録と連携する投薬管理はP2-2c以降で実装予定です。</p>
         </section>
       )}
-      {tab === "history" && (
-        <section className="card wide placeholder-panel">
-          <h2>履歴</h2>
-          <p className="muted">給餌・栄養・投薬の履歴を馬ごとに集約する領域です。既存データは変更していません。</p>
-        </section>
-      )}
+      {tab === "history" && <FeedingPlanHistoryPage horses={horses} selectedHorseId={selectedHorseId} />}
     </div>
   );
 }

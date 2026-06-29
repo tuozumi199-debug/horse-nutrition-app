@@ -8,6 +8,7 @@ import { formatNumber } from "../app/utils";
 import { getActivePlanItemsForHorse } from "../logic/dataSelectors";
 import { calculateFeedAmountAsFedKg } from "../logic/nutritionCalculator";
 import { createActiveFeedingPlanRevision } from "../logic/feedingPlanUpdater";
+import { getHorseClass, getHorseClassLabel } from "../logic/horseClass";
 
 type EditScope = "record-only" | "standard-menu";
 type ExceptionEditKind = "exception_override" | "exception_skip" | "memo";
@@ -344,7 +345,10 @@ export function FeedingRecordPage({
         <div className="page-heading-row">
           <div className="selected-horse-banner">
             <span className="selected-horse-label">選択中の馬</span>
-            <strong className="selected-horse-name">{horse.name}</strong>
+            <div className="horse-title-line">
+              <strong className="selected-horse-name">{horse.name}</strong>
+              <span className={`horse-class-badge horse-class-${getHorseClass(horse)}`}>{getHorseClassLabel(horse)}</span>
+            </div>
             <span className="selected-horse-context">本日の給餌管理</span>
           </div>
           <label className="field compact"><span>日付</span><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></label>

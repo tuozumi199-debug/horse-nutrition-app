@@ -12,6 +12,7 @@ import { findRequirementForHorse } from "../logic/requirementCalculator";
 import { calculateNutritionScore } from "../logic/scoreCalculator";
 import { getActivePlanItemsForHorse } from "../logic/dataSelectors";
 import { applySimulationToPlan, saveSimulationScenario } from "../logic/simulationEngine";
+import { getHorseClass, getHorseClassLabel } from "../logic/horseClass";
 import { formatNumber } from "../app/utils";
 
 type WorkItem = Omit<SimulationItem, "id" | "scenarioId">;
@@ -335,6 +336,17 @@ export function SimulationPage({
 
   return (
     <div className="grid two">
+      <section className="card wide">
+        <div className="selected-horse-banner">
+          <span className="selected-horse-label">選択中の馬</span>
+          <div className="horse-title-line">
+            <strong className="selected-horse-name">{horse.name}</strong>
+            <span className={`horse-class-badge horse-class-${getHorseClass(horse)}`}>{getHorseClassLabel(horse)}</span>
+          </div>
+          <span className="selected-horse-context">栄養シミュレーション</span>
+        </div>
+      </section>
+
       <section className="card wide">
         <div className="page-heading-row">
           <div>

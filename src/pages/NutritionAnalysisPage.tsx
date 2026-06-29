@@ -10,6 +10,7 @@ import { calculateDailyNutrition, calculateNutritionAchievement } from "../logic
 import { findRequirementForHorse } from "../logic/requirementCalculator";
 import { calculateNutritionScore } from "../logic/scoreCalculator";
 import { feedingRecordFromItem, getActivePlanItemsForHorse } from "../logic/dataSelectors";
+import { getHorseClass, getHorseClassLabel } from "../logic/horseClass";
 import { formatNumber } from "../app/utils";
 
 export function NutritionAnalysisPage({
@@ -64,7 +65,10 @@ export function NutritionAnalysisPage({
         <div className="page-heading-row">
           <div className="selected-horse-banner">
             <span className="selected-horse-label">選択中の馬</span>
-            <strong className="selected-horse-name">{horse.name}</strong>
+            <div className="horse-title-line">
+              <strong className="selected-horse-name">{horse.name}</strong>
+              <span className={`horse-class-badge horse-class-${getHorseClass(horse)}`}>{getHorseClassLabel(horse)}</span>
+            </div>
             <span className="selected-horse-context">栄養バランス分析</span>
           </div>
           <label className="field compact"><span>分析日</span><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></label>

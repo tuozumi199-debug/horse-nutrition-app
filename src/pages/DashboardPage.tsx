@@ -1,5 +1,6 @@
 import type { PageKey } from "../app/routes";
 import type { Horse } from "../types/horse";
+import { getHorseClass, getHorseClassLabel } from "../logic/horseClass";
 
 export function DashboardPage({
   horses,
@@ -40,6 +41,7 @@ export function DashboardPage({
                 {horse.photoDataUrl ? <img src={horse.photoDataUrl} alt="" /> : <span className="mini-photo">馬</span>}
                 <span>
                   <strong>{horse.name}</strong>
+                  <span className={`horse-class-badge horse-class-${getHorseClass(horse)}`}>{getHorseClassLabel(horse)}</span>
                   <small>{horse.weightKg}kg{horse.breed ? ` / ${horse.breed}` : ""}</small>
                 </span>
               </button>

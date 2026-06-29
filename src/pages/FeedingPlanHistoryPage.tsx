@@ -4,22 +4,26 @@ import type { FeedingPlanChangeLog } from "../types/feeding";
 import { currentMonth } from "../app/utils";
 import { formatDiffItem, getPlanChangeLogsForMonth } from "../logic/feedingPlanHistory";
 
-export function FeedingPlanHistoryPage({ horses }: { horses: Horse[] }) {
+export function FeedingPlanHistoryPage({ horses, selectedHorseId }: { horses: Horse[]; selectedHorseId?: string }) {
   const [month, setMonth] = useState(currentMonth());
   const [logs, setLogs] = useState<FeedingPlanChangeLog[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
 
   const horseById = useMemo(() => new Map(horses.map((horse) => [horse.id, horse])), [horses]);
+  const visibleLogs = useMemo(
+    () => selectedHorseId ? logs.filter((log) => log.horseId === selectedHorseId) : logs,
+    [logs, selectedHorseId]
+  );
   const logsByDate = useMemo(() => {
     const map = new Map<string, FeedingPlanChangeLog[]>();
-    for (const log of logs) {
+    for (const log of visibleLogs) {
       const list = map.get(log.changeDate) ?? [];
       list.push(log);
       map.set(log.changeDate, list);
     }
     return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
-  }, [logs]);
-  const selectedLogs = selectedDate ? logs.filter((log) => log.changeDate === selectedDate) : logsByDate[0]?.[1] ?? [];
+  }, [visibleLogs]);
+  const selectedLogs = selectedDate ? visibleLogs.filter((log) => log.changeDate === selectedDate) : logsByDate[0]?.[1] ?? [];
 
   useEffect(() => {
     async function load() {
@@ -46,14 +50,14 @@ export function FeedingPlanHistoryPage({ horses }: { horses: Horse[] }) {
             <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
           </label>
         </div>
-        {logs.length === 0 ? (
+        {visibleLogs.length === 0 ? (
           <p className="empty">まだ変更履歴はありません。</p>
         ) : (
           <div className="metrics">
             <div><span>変更日数</span><strong>{logsByDate.length}</strong></div>
-            <div><span>履歴件数</span><strong>{logs.length}</strong></div>
+            <div><span>履歴件数</span><strong>{visibleLogs.length}</strong></div>
             <div><span>選択日</span><strong>{selectedDate || "-"}</strong></div>
-            <div><span>対象馬</span><strong>{new Set(logs.map((log) => log.horseId)).size} 頭</strong></div>
+            <div><span>対象馬</span><strong>{new Set(visibleLogs.map((log) => log.horseId)).size} 頭</strong></div>
           </div>
         )}
       </section>

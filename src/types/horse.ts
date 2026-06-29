@@ -13,6 +13,8 @@ export type ActivityLevel = "none" | "light" | "moderate" | "heavy" | "very_heav
 
 export type HorseSex = "mare" | "stallion" | "gelding";
 
+export type HorseClass = "general" | "competition" | "fei";
+
 export type Horse = {
   id: string;
   name: string;
@@ -27,6 +29,7 @@ export type Horse = {
   activityLevel: ActivityLevel;
   healthNotes?: string;
   feedingNotes?: string;
+  horseClass?: HorseClass;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

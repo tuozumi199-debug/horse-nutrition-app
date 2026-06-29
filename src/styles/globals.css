@@ -382,10 +382,15 @@ tr.clickable-row:hover { background: var(--hover-bg); }
 .slot-feed-list small { display: block; color: var(--muted); overflow-wrap: anywhere; }
 .record-kind-label { color: var(--accent-dark); font-weight: 800; }
 .record-actions { display: inline-flex; flex-wrap: wrap; gap: 0.35rem; justify-content: flex-end; }
-.record-edit-panel { display: block; background: var(--surface-strong); border: 1px solid var(--line); border-radius: 14px; padding: 0.85rem; }
+.record-actions button { min-width: 72px; white-space: nowrap; }
+.slot-feed-list li.record-edit-panel { display: block; grid-column: 1 / -1; width: 100%; min-width: 0; background: var(--surface-strong); border: 1px solid var(--line); border-radius: 14px; padding: 0.85rem; }
+.record-edit-panel, .record-edit-panel * { min-width: 0; }
+.record-edit-panel .form-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); width: 100%; }
+.record-edit-panel .field span { white-space: normal; word-break: keep-all; overflow-wrap: anywhere; }
+.record-edit-panel input, .record-edit-panel select, .record-edit-panel textarea { min-width: 0; }
 .record-edit-panel .button-row { margin-top: 0.75rem; }
 .edit-scope-options { display: flex; flex-direction: column; gap: 0.45rem; margin: 0.75rem 0; color: var(--text); font-weight: 700; }
-.edit-scope-options label { display: flex; align-items: center; gap: 0.45rem; }
+.edit-scope-options label { display: flex; align-items: flex-start; gap: 0.45rem; white-space: normal; word-break: keep-all; line-height: 1.45; }
 .edit-scope-options input { width: auto; accent-color: var(--accent); }
 .tips { padding-left: 1.2rem; color: var(--muted); }
 .tips li { margin: 0.45rem 0; }
@@ -421,6 +426,10 @@ tr.clickable-row:hover { background: var(--hover-bg); }
 .horse-name-row img { width: 66px; height: 66px; border-radius: 18px; object-fit: cover; background: var(--accent-soft); flex: 0 0 auto; }
 .horse-title-line { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; }
 .horse-class-badge-slot { min-width: 3.5rem; min-height: 1.45rem; border-radius: 999px; border: 1px dashed var(--line); background: var(--surface-strong); }
+.horse-class-badge { display: inline-flex; align-items: center; width: fit-content; border-radius: 999px; padding: 0.16rem 0.55rem; font-size: 0.8rem; font-weight: 800; line-height: 1.2; border: 1px solid var(--line); white-space: nowrap; }
+.horse-class-general { background: var(--neutral-bg); color: var(--neutral-text); }
+.horse-class-competition { background: var(--ok-bg); color: var(--ok); }
+.horse-class-fei { background: var(--warn-bg); color: var(--warn); }
 .workspace-nav-card { box-shadow: none; }
 .placeholder-panel { min-height: 160px; display: flex; flex-direction: column; justify-content: center; }
 
@@ -447,6 +456,7 @@ tr.clickable-row:hover { background: var(--hover-bg); }
   .workspace-horse-banner { align-items: stretch; }
   .horse-name-row { align-items: flex-start; }
   .slot-feed-list li.with-action { grid-template-columns: 1fr; align-items: stretch; }
+  .record-edit-panel .form-grid { grid-template-columns: 1fr; }
   .record-actions { justify-content: flex-start; }
   .score-box { flex-direction: column; align-items: flex-start; }
   .horse-hero { align-items: flex-start; }

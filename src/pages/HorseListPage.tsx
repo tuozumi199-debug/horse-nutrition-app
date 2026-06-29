@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { db, makeId, nowIso } from "../db/localDb";
-import type { ActivityLevel, Horse, HorseSex, HorseStage } from "../types/horse";
+import type { ActivityLevel, Horse, HorseClass, HorseSex, HorseStage } from "../types/horse";
 import { activityLabels, activityOptions, stageLabels, stageOptions } from "../app/labels";
 import { imageFileToDataUrl } from "../app/utils";
+import { getHorseClass, getHorseClassLabel, horseClassLabels, horseClassOptions } from "../logic/horseClass";
 
 type HorseDraft = {
   id?: string;
@@ -17,6 +18,7 @@ type HorseDraft = {
   activityLevel: ActivityLevel;
   healthNotes?: string;
   feedingNotes?: string;
+  horseClass: HorseClass;
   photoDataUrl?: string;
   isActive: boolean;
 };
@@ -26,6 +28,7 @@ const emptyDraft: HorseDraft = {
   weightKg: 500,
   stage: "light_work",
   activityLevel: "light",
+  horseClass: "general",
   isActive: true
 };
 
@@ -44,7 +47,7 @@ export function HorseListPage({
   const [filter, setFilter] = useState("");
 
   function editHorse(horse: Horse) {
-    setDraft({ ...horse });
+    setDraft({ ...horse, horseClass: getHorseClass(horse) });
     onSelectHorse(horse.id);
   }
 
@@ -58,6 +61,7 @@ export function HorseListPage({
       weightKg: Number(draft.weightKg),
       targetWeightKg: draft.targetWeightKg ? Number(draft.targetWeightKg) : undefined,
       bcs: draft.bcs ? Number(draft.bcs) : undefined,
+      horseClass: draft.horseClass ?? "general",
       createdAt: draft.id ? (await db.horses.get(draft.id))?.createdAt ?? now : now,
       updatedAt: now
     };
@@ -87,6 +91,7 @@ export function HorseListPage({
           <label className="field"><span>目標体重 kg</span><input type="number" value={draft.targetWeightKg ?? ""} onChange={(e) => setDraft({ ...draft, targetWeightKg: e.target.value ? Number(e.target.value) : undefined })} /></label>
           <label className="field"><span>BCS</span><input type="number" step="0.5" min="1" max="9" value={draft.bcs ?? ""} onChange={(e) => setDraft({ ...draft, bcs: e.target.value ? Number(e.target.value) : undefined })} /></label>
           <label className="field"><span>品種</span><input value={draft.breed ?? ""} onChange={(e) => setDraft({ ...draft, breed: e.target.value })} /></label>
+          <label className="field"><span>馬クラス</span><select value={draft.horseClass} onChange={(e) => setDraft({ ...draft, horseClass: e.target.value as HorseClass })}>{horseClassOptions.map((item) => <option key={item} value={item}>{horseClassLabels[item]}</option>)}</select></label>
           <label className="field"><span>ステージ</span><select value={draft.stage} onChange={(e) => setDraft({ ...draft, stage: e.target.value as HorseStage })}>{stageOptions.map((s) => <option key={s} value={s}>{stageLabels[s]}</option>)}</select></label>
           <label className="field"><span>活動量</span><select value={draft.activityLevel} onChange={(e) => setDraft({ ...draft, activityLevel: e.target.value as ActivityLevel })}>{activityOptions.map((a) => <option key={a} value={a}>{activityLabels[a]}</option>)}</select></label>
           <label className="field"><span>写真</span><input type="file" accept="image/*" onChange={async (e) => { const file = e.target.files?.[0]; if (file) setDraft({ ...draft, photoDataUrl: await imageFileToDataUrl(file) }); }} /></label>
@@ -106,8 +111,12 @@ export function HorseListPage({
           {visible.map((horse) => (
             <article className={`list-card ${horse.id === selectedHorseId ? "selected" : ""}`} key={horse.id}>
               <button className="card-click" onClick={() => editHorse(horse)}>
-                {horse.photoDataUrl ? <img src={horse.photoDataUrl} alt="" /> : <span className="mini-photo">🐴</span>}
-                <span><strong>{horse.name}</strong><small>{horse.weightKg}kg / {stageLabels[horse.stage]} / {activityLabels[horse.activityLevel]}</small></span>
+                {horse.photoDataUrl ? <img src={horse.photoDataUrl} alt="" /> : <span className="mini-photo">馬</span>}
+                <span>
+                  <strong>{horse.name}</strong>
+                  <span className={`horse-class-badge horse-class-${getHorseClass(horse)}`}>{getHorseClassLabel(horse)}</span>
+                  <small>{horse.weightKg}kg / {stageLabels[horse.stage]} / {activityLabels[horse.activityLevel]}</small>
+                </span>
               </button>
               <button className="danger small" onClick={() => removeHorse(horse.id)}>無効化</button>
             </article>
